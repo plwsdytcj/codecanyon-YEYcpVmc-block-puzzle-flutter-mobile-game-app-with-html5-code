@@ -2,7 +2,7 @@ html {
     position: fixed;
     width: 100vw;
     height: 100vh;
-    background: black;
+    background: #FFB6C1; /* 糖果粉色背景 */
 }
 
 body {

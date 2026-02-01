@@ -483,14 +483,14 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="HandheldFriendly" content="true">
 <meta name="mobile-web-app-capable" content="yes">
-<title>Element Blocks</title>
+<title>Candy Blocks</title>
 <link rel="stylesheet" href="app.css" type="text/css" />
 <!--    <script src="lib/js/polyfill.min.js"></script>-->
 <!--    <script src="lib/js/phaser.min.js"></script>-->
 <!--    <script src="game.js"></script>-->
 <!-- ---------------- API Snippet ---------------- -->
 <script>
-    window.famobi_gameID = "element-blocks"; /* the actual GAMEID is added to the final version by Famobi */
+    window.famobi_gameID = "candy-blocks"; /* the actual GAMEID is added to the final version by Famobi */
     window.famobi_gameJS = ["lib/js/polyfill.min.js", "lib/js/phaser.min.js", "settings.js", "game.js", function() {
         window["game"] = new BlockPuzzle.App();
     }];
@@ -501,5 +501,8 @@
         firstJS.parentNode.insertBefore(fgJS, firstJS);
     })(document, 'html5games/gameapi/v1.js?e=');
 </script>
+
+<!-- AdMob Bridge for Flutter -->
+<script src="admob_bridge.js"></script>
 
 <body>
