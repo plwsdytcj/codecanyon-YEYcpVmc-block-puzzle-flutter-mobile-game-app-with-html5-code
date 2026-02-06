@@ -204,26 +204,24 @@ var rewardedAdObject = {
 
 window.famobi.hasRewardedAd = function() {
 
+    // 若不启用 rewarded 功能，直接禁用
     if (!window.famobi.hasFeature("rewarded")) {
         rewardedAdObject.enableLog && console.log("rewarded disabled")
         return false;
     }
 
-    rewardedAdObject.enableLog && console.log("current state: " + rewardedAdObject.state);
+    // 请求 Flutter 侧上报当前可用性（异步回调到 onAdReadyStatusChanged）
+    try { if (window.FlutterAdMob && typeof FlutterAdMob.checkRewardedAdReady === 'function') { FlutterAdMob.checkRewardedAdReady(); } } catch(e) {}
 
-    if (rewardedAdObject.state == rewardedAdObject.states.WAITING) {
-        try {
-            GAMESNACKS.rewardedAdOpportunity(rewardedAdObject);
-        } catch (e) {
-            console.log(e);
-        }
-        return typeof rewardedAdObject.showAdFn == "function";
+    // 将实际展示函数指向 Flutter
+    if (window.FlutterAdMob && typeof FlutterAdMob.showRewardedAd === 'function') {
+        rewardedAdObject.showAdFn = function() {
+            try { FlutterAdMob.showRewardedAd(); } catch (e) { console.log(e); }
+        };
     }
 
-    if (rewardedAdObject.state == rewardedAdObject.states.READY) {
-        return typeof rewardedAdObject.showAdFn == "function";
-    }
-    return false;
+    // 根据 FlutterAdMobState 的同步标志返回是否可用
+    return !!(window.FlutterAdMobState && window.FlutterAdMobState.rewardedReady && typeof rewardedAdObject.showAdFn === 'function');
 }
 
 window.famobi.rewardedAd = function(callback) {
@@ -282,4 +280,24 @@ window.famobi.rewardedAd = function(callback) {
             rewardGranted: false
         });
     }
+}
+
+// 覆盖插屏广告触发，转交给 Flutter AdMob
+if (typeof window.famobi !== 'undefined') {
+    (function() {
+        var originalShowInterstitial = window.famobi.showInterstitialAd;
+        window.famobi.showInterstitialAd = function(force) {
+            try {
+                if (window.FlutterAdMob && typeof FlutterAdMob.showInterstitialAd === 'function') {
+                    FlutterAdMob.showInterstitialAd();
+                    return Promise.resolve();
+                }
+            } catch (e) { console.log(e); }
+            // 兜底：如果 Flutter 不可用，调用原实现
+            if (typeof originalShowInterstitial === 'function') {
+                return originalShowInterstitial.call(window.famobi, force);
+            }
+            return Promise.resolve();
+        }
+    })();
 }

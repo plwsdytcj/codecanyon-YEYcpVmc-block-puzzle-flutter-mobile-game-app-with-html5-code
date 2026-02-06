@@ -30,18 +30,32 @@ window.FlutterAdMob = {
     }
 };
 
+// 由 Flutter 维护的 AdMob 状态（只存放必要的同步标志）
+window.FlutterAdMobState = {
+    rewardedReady: false
+};
+
 // 当用户获得广告奖励时的回调（由 Flutter 调用）
 window.onAdRewardEarned = function() {
     console.log('🎁 用户获得广告奖励！');
-    // 在这里添加奖励逻辑，例如增加星星
-    if (typeof addStars === 'function') {
-        addStars(10); // 奖励 10 个星星
+    // 通知 famobi 回调链，发放奖励并结束广告流程
+    if (typeof window.showRewarded_adViewed === 'function') {
+        try { window.showRewarded_adViewed(); } catch(e) { console.log(e); }
+    }
+};
+
+// 当用户关闭广告且未获得奖励（由 Flutter 调用）
+window.onAdRewardDismissed = function() {
+    console.log('ℹ️ 用户关闭广告，未获得奖励');
+    if (typeof window.showRewarded_adDismissed === 'function') {
+        try { window.showRewarded_adDismissed(); } catch(e) { console.log(e); }
     }
 };
 
 // 广告准备状态回调（由 Flutter 调用）
 window.onAdReadyStatusChanged = function(isReady) {
     console.log('📱 广告准备状态:', isReady);
+    window.FlutterAdMobState.rewardedReady = !!isReady;
 };
 
 console.log('✅ AdMob JavaScript 桥接已加载');

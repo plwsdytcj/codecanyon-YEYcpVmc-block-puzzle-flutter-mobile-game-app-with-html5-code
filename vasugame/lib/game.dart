@@ -53,6 +53,9 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
       if (rewarded) {
         // 通知 JavaScript 用户获得了奖励
         _controller.runJavaScript('onAdRewardEarned()');
+      } else {
+        // 未获得奖励或未显示成功时，通知 JS 以便回调链能结束
+        _controller.runJavaScript('if (typeof onAdRewardDismissed === "function") { onAdRewardDismissed(); }');
       }
     } else if (message == 'showInterstitialAd') {
       await AdManager().showInterstitialAd();

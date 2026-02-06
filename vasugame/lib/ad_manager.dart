@@ -122,6 +122,14 @@ class AdManager {
         onAdFailedToLoad: (error) {
           print('❌ 插屏广告加载失败: $error');
           _isInterstitialAdReady = false;
+          // 短暂延迟后重试加载，提升准备率
+          Future.delayed(const Duration(seconds: 5), () {
+            try {
+              loadInterstitialAd();
+            } catch (e) {
+              print('⚠️ 重新加载插屏广告异常: $e');
+            }
+          });
         },
       ),
     );
