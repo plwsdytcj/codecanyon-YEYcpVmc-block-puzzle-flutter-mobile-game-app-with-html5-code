@@ -8,3 +8,8 @@ const get_stars_button_cooldown = 300; //  how often will the "Get Free stars fo
 const get_stars_button_basic_reward = 5; //  how many stars will user get for watching first video ads after he pressed the "Get free stars" button.
 const get_stars_button_reward_step = 5; //  each next video watched by pressing "Get free stars" button will give more stars. Default value is 5, which means each next video will give 5 more stars (5, 10, 15, 20 etc). Set to 0 to disable increasing reward and keep it constant.
 const results_watch_video_reward = 10; //  how many stars player receives for watching rewarded video by pressing "Watch video" button on results screen
+
+// 性能优化设置 - Performance optimization settings
+const ENABLE_PARTICLES = true; // 设置为false可以禁用粒子效果以提升性能
+const ENABLE_ANIMATIONS = true; // 设置为false可以禁用部分动画以提升性能
+const REDUCE_EFFECTS = false; // 设置为true可以减少特效数量

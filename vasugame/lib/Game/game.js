@@ -107,7 +107,7 @@ var BlockPuzzle;
     Settings.BOARD_COLS = 8;
     Settings.CELL_WIDTH = 75;
     Settings.CELL_HEIGHT = Settings.CELL_WIDTH;
-    Settings.FIGURE_VIEW_DRAGGING_DELTA = -160;
+    Settings.FIGURE_VIEW_DRAGGING_DELTA = -80;
     Settings.FIGURE_VIEW_SPACING = 5;
     //FIGURES
     Settings.DEFAULT_FIGURE_SCALE = 0.4;
@@ -116,7 +116,7 @@ var BlockPuzzle;
     Settings.FIGURE_APPEARING_DURATION = 350;
     Settings.FIGURE_APPEARING_DELAY = 120;
     Settings.FIGURE_RETURNING_SPEED = 2000;
-    Settings.FIGURE_PICK_UP_TWEEN_DURATION = 70;
+    Settings.FIGURE_PICK_UP_TWEEN_DURATION = 50;
     Settings.FIGURE_DISPOSING_TWEEN_DURATION = 250;
     Settings.NOT_APPLICABLE_FIGURE_APLHA = 0.475;
     //BLOCKS
@@ -1744,8 +1744,8 @@ var BlockPuzzle;
             this.inputHandler = this.add(this.game.make.sprite(0, 0, BlockPuzzle.Settings.GAME_ATLAS, 'blackSquare0000'));
             this.inputHandler.anchor.set(0.5);
             this.inputHandler.inputEnabled = true;
-            this.inputHandler.width = 5 * BlockPuzzle.Settings.CELL_WIDTH * BlockPuzzle.Settings.DEFAULT_FIGURE_SCALE;
-            this.inputHandler.height = 5 * BlockPuzzle.Settings.CELL_HEIGHT * BlockPuzzle.Settings.DEFAULT_FIGURE_SCALE;
+            this.inputHandler.width =  8 * BlockPuzzle.Settings.CELL_WIDTH * BlockPuzzle.Settings.DEFAULT_FIGURE_SCALE;
+            this.inputHandler.height =  8 * BlockPuzzle.Settings.CELL_HEIGHT * BlockPuzzle.Settings.DEFAULT_FIGURE_SCALE;
             this.inputHandler.alpha = 0;
             this.inputHandler.events.onInputDown.add(this.handleInputDown, this);
             this.inputHandler.events.onInputUp.add(this.handleInputUp, this);
@@ -2040,7 +2040,18 @@ var BlockPuzzle;
         update() {
             super.update();
             if (this.activeFigure) {
-                this.activeFigure.position.copyFrom(this.getPointerLocalPosition().subtract(this.activeFigurePointerDelta.x, this.activeFigurePointerDelta.y));
+                const pointerPos = this.getPointerLocalPosition();
+                const screenHeight = this.level.windowBounds.height;
+                const screenTop = this.level.windowBounds.top;
+                
+                // 计算动态偏移量：越靠近顶部，偏移量越大
+                // 从底部（偏移量 1x）到顶部（偏移量 2.5x）线性变化
+                const normalizedY = Math.max(0, Math.min(1, (pointerPos.y - screenTop) / screenHeight));
+                const dynamicOffsetY = this.activeFigurePointerDelta.y * (2.5 - normalizedY * 1.5);
+                
+                this.activeFigure.position.copyFrom(
+                    pointerPos.subtract(this.activeFigurePointerDelta.x, dynamicOffsetY)
+                );
                 this.level.boardManager.getBoard().dispatchFigureIsBeingDragged(this.activeFigure);
             } else {
                 this.level.boardManager.getBoard().dispatchFigureIsBeingDragged(null);
@@ -2474,12 +2485,12 @@ var BlockPuzzle;
             this.buildContent();
         }
         buildContent() {
-            this.famobiLogo = this.add(this.game.make.image(0, 0, 'famobi-logo'));
-            this.famobiLogo.anchor.set(1, 1);
-            this.famobiLogo.scale.set(0.2);
-            this.famobiLogo.alpha = 0.85;
-            this.copyrightText = this.add(BlockPuzzle.TextUtils.getText('© Famobi', 0, 0, 28, '#FFFFFF', 'Russo One'));
-            this.copyrightText.alpha = 0.85;
+            // this.famobiLogo = this.add(this.game.make.image(0, 0, 'famobi-logo'));
+            // this.famobiLogo.anchor.set(1, 1);
+            // this.famobiLogo.scale.set(0.2);
+            // this.famobiLogo.alpha = 0.85;
+            // this.copyrightText = this.add(BlockPuzzle.TextUtils.getText('© Famobi', 0, 0, 28, '#FFFFFF', 'Russo One'));
+            // this.copyrightText.alpha = 0.85;
             this.buttonAchievements = this.add(new BlockPuzzle.ButtonAchievements(this.level));
             this.buttonSettings = this.add(BlockPuzzle.ButtonUtils.createSimpleButton(BlockPuzzle.Settings.GAME_ATLAS, 'buttonSettings', 0, 0, 1, this.settingsClicked, this));
             this.topContainer = this.add(this.game.make.group());
@@ -2499,11 +2510,11 @@ var BlockPuzzle;
             this.buttonSettings["setScale"](1.18);
             this.topContainer.position.set(availableBounds.x, availableBounds.y);
             this.topContainer.scale.set(Math.min(1.25, availableBounds.width / this.topContainer.getLocalBounds().width));
-            this.famobiLogo.visible = false;
-            this.famobiLogo.anchor.set(1, 1);
-            this.famobiLogo.position.copyFrom(this.level.windowBounds.getPosition(1, 1, 3, 3));
-            this.copyrightText.anchor.set(1, 1);
-            this.copyrightText.position.copyFrom(this.level.windowBounds.getPosition(1, 1, -5, 0));
+            // this.famobiLogo.visible = false;
+            // this.famobiLogo.anchor.set(1, 1);
+            // this.famobiLogo.position.copyFrom(this.level.windowBounds.getPosition(1, 1, 3, 3));
+            // this.copyrightText.anchor.set(1, 1);
+            // this.copyrightText.position.copyFrom(this.level.windowBounds.getPosition(1, 1, -5, 0));
             this.buttonAchievements.resizeLandscape();
             this.powerupContainer.resize();
         }
@@ -2519,9 +2530,9 @@ var BlockPuzzle;
             this.buttonSettings["setScale"](1.1);
             this.buttonAchievements.resizeSquared();
             this.powerupContainer.resize();
-            this.copyrightText.anchor.set(1, 1);
-            this.copyrightText.position.copyFrom(this.level.windowBounds.getPosition(1, 1, -5, 0));
-            this.famobiLogo.visible = false;
+            // this.copyrightText.anchor.set(1, 1);
+            // this.copyrightText.position.copyFrom(this.level.windowBounds.getPosition(1, 1, -5, 0));
+            // this.famobiLogo.visible = false;
         }
         resizePortrait() {
             const availableBounds = this.level.serviceManager.layoutService.getAvailableUIContainerBounds();
@@ -2537,11 +2548,11 @@ var BlockPuzzle;
             this.buttonSettings["setScale"](1.1);
             this.buttonAchievements.resizePortrait();
             this.powerupContainer.resize();
-            this.famobiLogo.visible = false;
-            this.famobiLogo.anchor.set(1, 0);
-            this.famobiLogo.position.copyFrom(this.level.windowBounds.getPosition(1, 0, -3, -1));
-            this.copyrightText.anchor.set(1, 0);
-            this.copyrightText.position.copyFrom(this.level.windowBounds.getPosition(1, 0, -5, 1));
+            // this.famobiLogo.visible = false;
+            // this.famobiLogo.anchor.set(1, 0);
+            // this.famobiLogo.position.copyFrom(this.level.windowBounds.getPosition(1, 0, -3, -1));
+            // this.copyrightText.anchor.set(1, 0);
+            // this.copyrightText.position.copyFrom(this.level.windowBounds.getPosition(1, 0, -5, 1));
         }
         levelFinished() {
             this.powerupContainer.hidePowerups();
@@ -4013,8 +4024,8 @@ var BlockPuzzle;
             this.preloadBar.anchor.setTo(0, 0.5);
             this.load.setPreloadSprite(this.preloadBar);
             this.versionText = this.addChild(BlockPuzzle.TextUtils.getText('v' + BlockPuzzle.Settings.GAME_VERSION, 0, 0, 12, "#ffffff"));
-            this.copyrightText = this.addChild(BlockPuzzle.TextUtils.getText('© Famobi', 0, 0, 12, "#ffffff", 'Russo One'));
-            this.copyrightText.anchor.set(1, 1);
+            // this.copyrightText = this.addChild(BlockPuzzle.TextUtils.getText('© Famobi', 0, 0, 12, "#ffffff", 'Russo One'));
+            // this.copyrightText.anchor.set(1, 1);
             this.preloadText = this.preloadContainer.add(new BlockPuzzle.BitmapTextField("0%", BlockPuzzle.Settings.PRELOADER_ATLAS, "Gold", 1, 0.5, 0.5, 1));
             this.preloadText.position.set(0, 65);
             this.game.load.onFileComplete.add(this.onFileComplete, this);
@@ -4044,7 +4055,7 @@ var BlockPuzzle;
                 this.backScreen.height = this.windowBounds.height * BlockPuzzle.CustomScaleManager.SCALE_X + 100;
                 this.preloadContainer.position.copyFrom(this.windowBounds.getPosition(0.5, 0.58));
                 this.versionText.position.set(this.windowBounds.left + 25, this.windowBounds.down - 16);
-                this.copyrightText.position.set(this.windowBounds.right - 5, this.windowBounds.down - 1);
+                // this.copyrightText.position.set(this.windowBounds.right - 5, this.windowBounds.down - 1);
                 this.logo.position.copyFrom(this.windowBounds.getPosition(0.5, 0.24));
             }
         }

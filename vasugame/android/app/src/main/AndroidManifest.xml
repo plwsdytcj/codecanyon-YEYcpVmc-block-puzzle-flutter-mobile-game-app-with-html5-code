@@ -39,7 +39,7 @@
         <!-- AdMob App ID -->
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="ca-app-pub-3940256099942544~3347511713"/>
+            android:value="ca-app-pub-5937681356868683~7978121691"/>
         <!-- 测试 App ID，上线前需要替换为你的真实 App ID -->
 
 

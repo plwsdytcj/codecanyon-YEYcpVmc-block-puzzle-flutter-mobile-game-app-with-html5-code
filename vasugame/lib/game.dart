@@ -8,14 +8,17 @@ class MainPage extends StatefulWidget {
   State<MainPage> createState() => _MainPageState();
 }
 
-class _MainPageState extends State<MainPage> {
+class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
   late WebViewControllerPlus _controller;
 
   @override
   void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+
     _controller = WebViewControllerPlus()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
-      ..setBackgroundColor(const Color(0x00000000))
+      ..setBackgroundColor(const Color(0xFF000000)) // 改为黑色背景，提升性能
       ..setNavigationDelegate(
         NavigationDelegate(
           onPageStarted: (url) {
@@ -30,7 +33,12 @@ class _MainPageState extends State<MainPage> {
         },
       )
       ..loadFlutterAssetServer('lib/Game/index.html');
-    super.initState();
+
+    // 设置系统 UI 模式 - 只在初始化时设置一次
+    SystemChrome.setEnabledSystemUIMode(
+      SystemUiMode.manual,
+      overlays: [SystemUiOverlay.top],
+    );
     SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
     ));
@@ -54,10 +62,22 @@ class _MainPageState extends State<MainPage> {
     }
   }
 
+  // 处理应用生命周期变化
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+
+    // 当应用恢复时（例如截图后），确保游戏继续运行
+    if (state == AppLifecycleState.resumed) {
+      // 延迟一小段时间后恢复游戏，确保系统 UI 已稳定
+      Future.delayed(const Duration(milliseconds: 100), () {
+        _controller.runJavaScript('if(window.game && window.game.unpauseGame) { window.game.unpauseGame(true); }');
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
-        overlays: [SystemUiOverlay.top]);
     return Scaffold(
       body: WebViewWidget(
         controller: _controller,
@@ -67,6 +87,7 @@ class _MainPageState extends State<MainPage> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _controller.server.close();
     super.dispose();
   }

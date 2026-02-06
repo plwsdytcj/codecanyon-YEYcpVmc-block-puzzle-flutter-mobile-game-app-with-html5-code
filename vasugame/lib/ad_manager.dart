@@ -15,18 +15,18 @@ class AdManager {
   // 上线前需要替换为你在 AdMob 控制台创建的真实广告 ID
   static String get rewardedAdUnitId {
     if (Platform.isAndroid) {
-      return 'ca-app-pub-3940256099942544/5224354917'; // Android 测试 ID
+      return 'ca-app-pub-5937681356868683/3256385858'; // Android 测试 ID
     } else if (Platform.isIOS) {
-      return 'ca-app-pub-3940256099942544/1712485313'; // iOS 测试 ID
+      return 'ca-app-pub-5937681356868683/1460078715'; // iOS 测试 ID
     }
     return '';
   }
 
   static String get interstitialAdUnitId {
     if (Platform.isAndroid) {
-      return 'ca-app-pub-3940256099942544/1033173712'; // Android 测试 ID
+      return 'ca-app-pub-5937681356868683/8867805185'; // Android 测试 ID
     } else if (Platform.isIOS) {
-      return 'ca-app-pub-3940256099942544/4411468910'; // iOS 测试 ID
+      return 'ca-app-pub-5937681356868683/6341714198'; // iOS 测试 ID
     }
     return '';
   }
