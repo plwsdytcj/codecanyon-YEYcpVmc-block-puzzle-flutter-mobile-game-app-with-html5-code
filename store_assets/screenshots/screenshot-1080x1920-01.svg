@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1920" viewBox="0 0 1080 1920">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#6ee7b7" offset="0"/>
+      <stop stop-color="#60a5fa" offset="1"/>
+    </linearGradient>
+  </defs>
+  <rect width="1080" height="1920" fill="#0b0f1a"/>
+  <rect x="120" y="380" width="210" height="210" rx="28" fill="url(#g)"/>
+  <rect x="350" y="380" width="210" height="210" rx="28" fill="url(#g)" opacity="0.75"/>
+  <rect x="235" y="610" width="210" height="210" rx="28" fill="url(#g)" opacity="0.6"/>
+  <text x="120" y="280" fill="#e6eaf2" font-family="-apple-system,Segoe UI,Roboto,Helvetica,Arial" font-size="72" font-weight="700">Block Puzzle</text>
+  <text x="120" y="330" fill="#9aa4b2" font-family="-apple-system,Segoe UI,Roboto,Helvetica,Arial" font-size="30">Relaxing block gameplay</text>
+  <text x="120" y="980" fill="#cbd5e1" font-family="-apple-system,Segoe UI,Roboto,Helvetica,Arial" font-size="40">• Drag. Place. Clear.</text>
+  <text x="120" y="1040" fill="#cbd5e1" font-family="-apple-system,Segoe UI,Roboto,Helvetica,Arial" font-size="40">• No time pressure</text>
+  <text x="120" y="1100" fill="#cbd5e1" font-family="-apple-system,Segoe UI,Roboto,Helvetica,Arial" font-size="40">• Smooth & lightweight</text>
+</svg>
+
