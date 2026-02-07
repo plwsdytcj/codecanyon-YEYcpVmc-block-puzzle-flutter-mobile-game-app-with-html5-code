@@ -1,0 +1,15 @@
+## Rename this file to `key.properties` and fill with your signing credentials.
+## NEVER commit your real `key.properties` or `.jks` files.
+
+# Path to your upload keystore file (relative to android/ directory or absolute)
+storeFile=app/blockpuzzle-upload.jks
+
+# Keystore password
+storePassword=YOUR_STORE_PASSWORD
+
+# Key alias inside the keystore
+keyAlias=upload
+
+# Key password for the alias
+keyPassword=YOUR_KEY_PASSWORD
+
