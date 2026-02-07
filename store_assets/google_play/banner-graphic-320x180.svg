@@ -9,7 +9,6 @@
   <rect x="16" y="24" width="48" height="48" rx="8" fill="url(#g)"/>
   <rect x="72" y="24" width="48" height="48" rx="8" fill="url(#g)" opacity="0.7"/>
   <rect x="44" y="80" width="48" height="48" rx="8" fill="url(#g)" opacity="0.5"/>
-  <text x="140" y="78" fill="#e6eaf2" font-family="-apple-system,Segoe UI,Roboto,Helvetica,Arial" font-size="20" font-weight="700">Block Puzzle</text>
+  <text x="140" y="78" fill="#e6eaf2" font-family="-apple-system,Segoe UI,Roboto,Helvetica,Arial" font-size="20" font-weight="700">Wonder Blast</text>
   <text x="140" y="106" fill="#9aa4b2" font-family="-apple-system,Segoe UI,Roboto,Helvetica,Arial" font-size="11">Relaxing & strategic block game</text>
 </svg>
-

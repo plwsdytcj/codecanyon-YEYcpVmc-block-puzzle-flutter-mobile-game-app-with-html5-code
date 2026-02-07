@@ -11,8 +11,7 @@
     <rect x="170" width="140" height="140" rx="20" fill="url(#g)" opacity="0.75"/>
     <rect x="85" y="160" width="140" height="140" rx="20" fill="url(#g)" opacity="0.6"/>
   </g>
-  <text x="420" y="200" fill="#e6eaf2" font-family="-apple-system,Segoe UI,Roboto,Helvetica,Arial" font-size="56" font-weight="700">Block Puzzle</text>
+  <text x="420" y="200" fill="#e6eaf2" font-family="-apple-system,Segoe UI,Roboto,Helvetica,Arial" font-size="56" font-weight="700">Wonder Blast</text>
   <text x="420" y="265" fill="#9aa4b2" font-family="-apple-system,Segoe UI,Roboto,Helvetica,Arial" font-size="28">Relaxing, strategic block placement & clearing</text>
   <text x="420" y="310" fill="#cbd5e1" font-family="-apple-system,Segoe UI,Roboto,Helvetica,Arial" font-size="22">Optional rewarded ads — fair & player‑friendly</text>
 </svg>
-
