@@ -15,6 +15,8 @@ What’s included
 - screenshots/
   - screenshot-1080x1920-01/02/03.svg (editable templates)
   - screenshot-1080x1920-01/02/03.png (exported PNGs)
+  - raw/shot*.png (your raw emulator/phone captures)
+  - final/screenshot-1080x1920-*.png (processed with titles)
 - copy/
   - en.txt / zh.txt — Short/Full descriptions and keywords
 - scripts/
