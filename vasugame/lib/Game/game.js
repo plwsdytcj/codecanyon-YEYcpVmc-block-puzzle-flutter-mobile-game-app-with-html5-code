@@ -107,7 +107,12 @@ var BlockPuzzle;
     Settings.BOARD_COLS = 8;
     Settings.CELL_WIDTH = 75;
     Settings.CELL_HEIGHT = Settings.CELL_WIDTH;
-    Settings.FIGURE_VIEW_DRAGGING_DELTA = -80;
+    Settings.FIGURE_VIEW_DRAGGING_DELTA = (typeof figure_view_dragging_delta !== 'undefined') ? figure_view_dragging_delta : -80;
+    // Drag offset behavior
+    Settings.DYNAMIC_DRAG_OFFSET_ENABLED = (typeof dynamic_drag_offset_enabled !== 'undefined') ? dynamic_drag_offset_enabled : true; // 是否启用“越往上偏移越大”
+    Settings.DRAG_OFFSET_BOTTOM_FACTOR = (typeof drag_offset_bottom_factor !== 'undefined') ? drag_offset_bottom_factor : 1.0;    // 底部偏移系数（乘以初始手指-方块偏移）
+    Settings.DRAG_OFFSET_TOP_FACTOR = (typeof drag_offset_top_factor !== 'undefined') ? drag_offset_top_factor : 1.8;       // 顶部偏移系数（建议 1.4 - 2.0）
+    Settings.DRAG_OFFSET_SMOOTHING = (typeof drag_offset_smoothing !== 'undefined') ? drag_offset_smoothing : 0.22;       // 平滑系数(0-1)，越小越平滑
     Settings.FIGURE_VIEW_SPACING = 5;
     //FIGURES
     Settings.DEFAULT_FIGURE_SCALE = 0.4;
@@ -2040,18 +2045,27 @@ var BlockPuzzle;
         update() {
             super.update();
             if (this.activeFigure) {
+                // 使用与渲染同一坐标系的世界坐标计算归一化 Y，避免坐标系不一致导致的抖动
+                const pointerWorldY = this.game.input.activePointer.position.y;
+                const gameHeight = Math.max(1, this.game.height);
+                const normalizedY = Phaser.Math.clamp(pointerWorldY / gameHeight, 0, 1);
+
+                // 计算动态偏移因子：顶部更大，底部更小
+                const topFactor = BlockPuzzle.Settings.DRAG_OFFSET_TOP_FACTOR;
+                const bottomFactor = BlockPuzzle.Settings.DRAG_OFFSET_BOTTOM_FACTOR;
+                const targetFactor = topFactor - (topFactor - bottomFactor) * normalizedY; // y=0 顶部→topFactor, y=1 底部→bottomFactor
+
+                // 指数平滑，减少“卡顿感”
+                this._dragOffsetFactor = this._dragOffsetFactor || bottomFactor;
+                const alpha = Phaser.Math.clamp(BlockPuzzle.Settings.DRAG_OFFSET_SMOOTHING, 0, 1);
+                this._dragOffsetFactor = this._dragOffsetFactor + (targetFactor - this._dragOffsetFactor) * alpha;
+
+                // 计算在 figuresContainer 坐标系下的位置
                 const pointerPos = this.getPointerLocalPosition();
-                const screenHeight = this.level.windowBounds.height;
-                const screenTop = this.level.windowBounds.top;
-                
-                // 计算动态偏移量：越靠近顶部，偏移量越大
-                // 从底部（偏移量 1x）到顶部（偏移量 2.5x）线性变化
-                const normalizedY = Math.max(0, Math.min(1, (pointerPos.y - screenTop) / screenHeight));
-                const dynamicOffsetY = this.activeFigurePointerDelta.y * (2.5 - normalizedY * 1.5);
-                
-                this.activeFigure.position.copyFrom(
-                    pointerPos.subtract(this.activeFigurePointerDelta.x, dynamicOffsetY)
-                );
+                const factor = BlockPuzzle.Settings.DYNAMIC_DRAG_OFFSET_ENABLED ? this._dragOffsetFactor : 1.0;
+                const dynamicOffsetY = this.activeFigurePointerDelta.y * factor;
+
+                this.activeFigure.position.copyFrom(pointerPos.subtract(this.activeFigurePointerDelta.x, dynamicOffsetY));
                 this.level.boardManager.getBoard().dispatchFigureIsBeingDragged(this.activeFigure);
             } else {
                 this.level.boardManager.getBoard().dispatchFigureIsBeingDragged(null);

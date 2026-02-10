@@ -13,3 +13,17 @@ const results_watch_video_reward = 10; //  how many stars player receives for wa
 const ENABLE_PARTICLES = true; // 设置为false可以禁用粒子效果以提升性能
 const ENABLE_ANIMATIONS = true; // 设置为false可以禁用部分动画以提升性能
 const REDUCE_EFFECTS = false; // 设置为true可以减少特效数量
+
+// 触控拖拽偏移（防手指遮挡）
+// - dynamic_drag_offset_enabled: true 启用“越往屏幕上方偏移越大”的动态策略；false 使用固定偏移
+// - drag_offset_bottom_factor: 底部区域的偏移倍数（1.0=保持初始）
+// - drag_offset_top_factor: 顶部区域的偏移倍数（建议 1.4 - 2.0）
+// - drag_offset_smoothing: 平滑系数 0-1，越小越平滑
+const dynamic_drag_offset_enabled = true;
+const drag_offset_bottom_factor = 1.0;
+const drag_offset_top_factor = 1.6;
+const drag_offset_smoothing = 0.2;
+
+// 固定偏移量（当 dynamic_drag_offset_enabled=false 时生效）
+// 负值表示方块相对手指向上偏移，单位：像素（基于游戏坐标的缩放前像素）
+const figure_view_dragging_delta = -80;
