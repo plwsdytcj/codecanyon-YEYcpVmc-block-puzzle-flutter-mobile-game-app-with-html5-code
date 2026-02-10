@@ -10,6 +10,7 @@ class MainPage extends StatefulWidget {
 
 class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
   late WebViewControllerPlus _controller;
+  bool _isLoading = true;
 
   @override
   void initState() {
@@ -22,7 +23,16 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
       ..setNavigationDelegate(
         NavigationDelegate(
           onPageStarted: (url) {
-            // Add any necessary logic when a new page starts loading
+            setState(() {
+              _isLoading = true;
+            });
+          },
+          onPageFinished: (url) {
+            if (mounted) {
+              setState(() {
+                _isLoading = false;
+              });
+            }
           },
         ),
       )
@@ -82,8 +92,15 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: WebViewWidget(
-        controller: _controller,
+      backgroundColor: Colors.black,
+      body: Stack(
+        children: [
+          WebViewWidget(controller: _controller),
+          if (_isLoading)
+            const Center(
+              child: CircularProgressIndicator(color: Colors.white),
+            ),
+        ],
       ),
     );
   }
