@@ -27,3 +27,12 @@ const drag_offset_smoothing = 0.2;
 // 固定偏移量（当 dynamic_drag_offset_enabled=false 时生效）
 // 负值表示方块相对手指向上偏移，单位：像素（基于游戏坐标的缩放前像素）
 const figure_view_dragging_delta = -80;
+
+// 指数缓冲拖拽偏移（启用则覆盖上方动态偏移策略）
+// d2(Δy) = d1 + maxExtra × (1 - e^(-k × Δy))
+// - drag_expo_enabled: 是否启用指数偏移
+// - drag_expo_max_extra: 最大额外偏移（像素）
+// - drag_expo_k: 衰减系数（越大越快接近上限）
+const drag_expo_enabled = true;
+const drag_expo_max_extra = 100;
+const drag_expo_k = 0.022;
