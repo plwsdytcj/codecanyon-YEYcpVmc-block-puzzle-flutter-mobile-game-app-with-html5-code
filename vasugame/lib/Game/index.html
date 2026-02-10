@@ -470,7 +470,21 @@
         })();
     }).call(this);
 </script>
-<script src="https://www.gstatic.com/h5games_sdks/developer_v1.js" data-target-origin="https://gamesnacks.com" data-user-activity-metrics nonce="i0sbycPRFKuZpR1x1bLDHQ"></script>
+<!-- 可选：仅在在线时加载 GameSnacks 开发者 SDK，离线不加载以避免首开阻塞 -->
+<script>
+  (function(){
+    try {
+      if (!navigator.onLine) return;
+      var s = document.createElement('script');
+      s.src = 'https://www.gstatic.com/h5games_sdks/developer_v1.js';
+      s.setAttribute('data-target-origin','https://gamesnacks.com');
+      s.setAttribute('data-user-activity-metrics','');
+      s.defer = true;
+      s.onerror = function(){}; // 离线/失败忽略
+      document.head.appendChild(s);
+    } catch (_) {}
+  })();
+</script>
 <meta name="robots" content="noindex, nofollow">
 <meta charset="UTF-8">
 <!-- 启用缓存以提升性能 -->

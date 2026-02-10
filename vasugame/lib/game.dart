@@ -11,6 +11,9 @@ class MainPage extends StatefulWidget {
 class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
   late WebViewControllerPlus _controller;
   bool _isLoading = true;
+  bool _hasError = false;
+  String? _errorDescription;
+  Future<void>? _watchdog;
 
   @override
   void initState() {
@@ -25,12 +28,31 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
           onPageStarted: (url) {
             setState(() {
               _isLoading = true;
+              _hasError = false;
+              _errorDescription = null;
             });
+          },
+          onProgress: (progress) {
+            // 进度到 90% 先行隐藏 loading，避免 onPageFinished 未回调导致长时间等待
+            if (progress >= 90 && _isLoading && mounted) {
+              setState(() {
+                _isLoading = false;
+              });
+            }
           },
           onPageFinished: (url) {
             if (mounted) {
               setState(() {
                 _isLoading = false;
+              });
+            }
+          },
+          onWebResourceError: (error) {
+            if (mounted) {
+              setState(() {
+                _hasError = true;
+                _isLoading = false;
+                _errorDescription = error.description;
               });
             }
           },
@@ -43,6 +65,15 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
         },
       )
       ..loadFlutterAssetServer('lib/Game/index.html');
+
+    // Watchdog：极端情况下未触发 onPageFinished，最多等待 6 秒
+    _watchdog = Future.delayed(const Duration(seconds: 6), () {
+      if (mounted && _isLoading && !_hasError) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    });
 
     // 设置系统 UI 模式 - 只在初始化时设置一次
     SystemChrome.setEnabledSystemUIMode(
@@ -99,6 +130,41 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
           if (_isLoading)
             const Center(
               child: CircularProgressIndicator(color: Colors.white),
+            ),
+          if (_hasError)
+            Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text(
+                    '加载失败',
+                    style: TextStyle(color: Colors.white, fontSize: 18),
+                  ),
+                  if (_errorDescription != null) ...[
+                    const SizedBox(height: 8),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                      child: Text(
+                        _errorDescription!,
+                        style: const TextStyle(color: Colors.white70, fontSize: 14),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ],
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () {
+                      setState(() {
+                        _hasError = false;
+                        _isLoading = true;
+                        _errorDescription = null;
+                      });
+                      _controller.reload();
+                    },
+                    child: const Text('重试'),
+                  ),
+                ],
+              ),
             ),
         ],
       ),

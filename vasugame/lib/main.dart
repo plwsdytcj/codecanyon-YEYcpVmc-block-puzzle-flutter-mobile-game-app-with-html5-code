@@ -5,8 +5,10 @@ import 'ad_manager.dart';
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
   runApp(const MyApp());
-  // 广告初始化放到后台执行，避免首屏阻塞
-  AdManager().initialize();
+  // 广告初始化放到首帧之后执行，避免首屏阻塞
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    AdManager().initialize();
+  });
 }
 
 class MyApp extends StatelessWidget {
