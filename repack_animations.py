@@ -13,7 +13,11 @@ pack_sprites(
     sprites_dir="extracted_sprites/animations",
     output_atlas="vasugame/lib/Game/img/animations_new.png",
     output_json="vasugame/lib/Game/img/animations_new.json",
-    max_width=2048
+    max_width=2048,
+    scale=0.92,             # 动画可以小幅降分辨率 
+    quantize_colors=160,    # 动画色数往往更多，可用 160-192；如出现色带升到 192
+    png_optimize=True,
+    png_compress_level=9
 )
 
 print("\n✅ 打包完成！")

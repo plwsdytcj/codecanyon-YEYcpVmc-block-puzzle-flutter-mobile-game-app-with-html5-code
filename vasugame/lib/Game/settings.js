@@ -21,8 +21,8 @@ const REDUCE_EFFECTS = false; // 设置为true可以减少特效数量
 // - drag_offset_smoothing: 平滑系数 0-1，越小越平滑
 const dynamic_drag_offset_enabled = true;
 const drag_offset_bottom_factor = 1.0;
-const drag_offset_top_factor = 1.6;
-const drag_offset_smoothing = 0.2;
+const drag_offset_top_factor = 1.3; // 降低顶部偏移强度，手感更跟手
+const drag_offset_smoothing = 0.6;   // 提升响应（0=很黏滞，1=立即到位）
 
 // 固定偏移量（当 dynamic_drag_offset_enabled=false 时生效）
 // 负值表示方块相对手指向上偏移，单位：像素（基于游戏坐标的缩放前像素）
@@ -34,5 +34,5 @@ const figure_view_dragging_delta = -80;
 // - drag_expo_max_extra: 最大额外偏移（像素）
 // - drag_expo_k: 衰减系数（越大越快接近上限）
 const drag_expo_enabled = true;
-const drag_expo_max_extra = 100;
-const drag_expo_k = 0.022;
+const drag_expo_max_extra = 50;      // 降低额外偏移上限，避免“漂移感”
+const drag_expo_k = 0.012;           // 放缓指数增长，减小向上拖拽的放大效应

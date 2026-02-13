@@ -80,7 +80,8 @@ var BlockPuzzle;
             const isIE = window.navigator.userAgent.indexOf('MSIE ') > 0 || window.navigator.userAgent.indexOf('Trident/') > 0;
             const isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
             const isIPhone = window.navigator.userAgent.indexOf('iPhone ') > -1;
-            return isIE || isFirefox || isIPhone ? Phaser.CANVAS : Phaser.AUTO;
+            const lowMem = (navigator && navigator.deviceMemory) ? (navigator.deviceMemory <= 2) : false;
+            return (isIE || isFirefox || isIPhone || lowMem) ? Phaser.CANVAS : Phaser.AUTO;
         }
     }
     BlockPuzzle.RenderUtils = RenderUtils;
@@ -89,8 +90,12 @@ var BlockPuzzle;
 (function(BlockPuzzle) {
     class Settings {}
     //SCALING
-    Settings.USE_HIGH_RESOLUTION_SCALING = true;
-    Settings.PIXEL_RATIO_MAX_THRESHOLD = 3;
+    Settings.USE_HIGH_RESOLUTION_SCALING = false; // 关闭高分屏缩放以提升 WebView 性能
+    Settings.PIXEL_RATIO_MAX_THRESHOLD = 1;       // 限制像素比，减小渲染分辨率
+    // Runtime performance flags from settings.js (with safe defaults)
+    Settings.ENABLE_PARTICLES = (typeof ENABLE_PARTICLES !== 'undefined') ? ENABLE_PARTICLES : true;
+    Settings.ENABLE_ANIMATIONS = (typeof ENABLE_ANIMATIONS !== 'undefined') ? ENABLE_ANIMATIONS : true;
+    Settings.REDUCE_EFFECTS   = (typeof REDUCE_EFFECTS   !== 'undefined') ? REDUCE_EFFECTS   : false;
     //FONTS
     Settings.DEFAULT_FONT_FAMILY = 'Kanit';
     //WINDOWS
@@ -232,7 +237,8 @@ var BlockPuzzle;
         width: BlockPuzzle.CustomScaleManager.ORIGINAL_WIDTH,
         height: BlockPuzzle.CustomScaleManager.ORIGINAL_HEIGHT,
         renderer: BlockPuzzle.RenderUtils.detectRenderMode(),
-        transparent: true,
+        transparent: false,   // 关闭透明以避免额外的合成开销
+        antialias: false,     // 关闭抗锯齿，提升绘制性能
         enableDebug: false
     };
     BlockPuzzle.App = App;
@@ -760,16 +766,22 @@ var BlockPuzzle;
     class BestScoreReachedEffectEmitter extends Phaser.Particles.Arcade.Emitter {
         constructor(x, y, maxParticles) {
             super(BlockPuzzle.App.instance, x, y, maxParticles);
+            if (!BlockPuzzle.Settings.ENABLE_PARTICLES) {
+                this.exists = false; this.visible = false; this.on = false;
+                this.game.time.events.add(0, () => this.destroy());
+                return;
+            }
             this.width = BlockPuzzle.CustomScaleManager.ORIGINAL_WIDTH;
             this.height = 30;
             this.minParticleScale = 1;
-            this.maxParticleScale = 1.4;
-            this.makeParticles(BlockPuzzle.Settings.ANIMATION_ATLAS, ['particleStar10000', 'particleStar20000', 'particleStar30000'], maxParticles);
+            this.maxParticleScale = BlockPuzzle.Settings.REDUCE_EFFECTS ? 1.2 : 1.4;
+            const count = BlockPuzzle.Settings.REDUCE_EFFECTS ? Math.max(6, Math.floor(maxParticles * 0.5)) : maxParticles;
+            this.makeParticles(BlockPuzzle.Settings.ANIMATION_ATLAS, ['particleStar10000', 'particleStar20000', 'particleStar30000'], count);
             this.gravity.set(0, 1200);
             this.setYSpeed(-100, 700);
             this.autoAlpha = true;
             this.setAlpha(1, 0.0, 1800, Phaser.Easing.Quadratic.In);
-            this.flow(3500, 5, 6, maxParticles, false);
+            this.flow(3500, BlockPuzzle.Settings.REDUCE_EFFECTS ? 8 : 5, BlockPuzzle.Settings.REDUCE_EFFECTS ? 4 : 6, count, false);
         }
     }
     BlockPuzzle.BestScoreReachedEffectEmitter = BestScoreReachedEffectEmitter;
@@ -779,12 +791,17 @@ var BlockPuzzle;
     class ExplodingEffectEmitter extends Phaser.Particles.Arcade.Emitter {
         constructor(targetPosition) {
             super(BlockPuzzle.App.instance, targetPosition.x, targetPosition.y, 100);
-            this.particlefrequency = 12;
+            if (!BlockPuzzle.Settings.ENABLE_PARTICLES) {
+                this.exists = false; this.visible = false; this.on = false;
+                this.game.time.events.add(0, () => this.destroy());
+                return;
+            }
+            this.particlefrequency = BlockPuzzle.Settings.REDUCE_EFFECTS ? 18 : 12;
             this.makeParticles(BlockPuzzle.Settings.ANIMATION_ATLAS, ['particleStar10000', 'particleStar20000', 'particleStar30000']);
             this.width = 40;
             this.height = 40;
             this.minParticleScale = 1.0;
-            this.maxParticleScale = 2.5;
+            this.maxParticleScale = BlockPuzzle.Settings.REDUCE_EFFECTS ? 1.8 : 2.5;
             this.gravity.setTo(0, 0);
             this.setYSpeed(-130, 130);
             this.setXSpeed(-130, 130);
@@ -793,8 +810,8 @@ var BlockPuzzle;
             this.autoAlpha = true;
             this.setAlpha(1, 0, 420, Phaser.Easing.Quintic.In);
             this.autoScale = true;
-            this.setScale(2, 0.6, 2, 0.6, 500, Phaser.Easing.Sinusoidal.InOut);
-            this.start(false, 600, this.particlefrequency, 100 / this.particlefrequency);
+            this.setScale(1.6, 0.6, 1.6, 0.6, 500, Phaser.Easing.Sinusoidal.InOut);
+            this.start(false, 600, this.particlefrequency, (BlockPuzzle.Settings.REDUCE_EFFECTS ? 60 : 100) / this.particlefrequency);
             this.game.time.events.add(1600, () => this.destroy());
         }
     }
@@ -805,8 +822,13 @@ var BlockPuzzle;
     class FlyingParticlesEmitter extends Phaser.Particles.Arcade.Emitter {
         constructor(level, points, startPosition, targetPosition) {
             super(level.game, startPosition.x, startPosition.y, 250);
-            this.particleSpeed = 1200;
-            this.particlefrequency = 17;
+            if (!BlockPuzzle.Settings.ENABLE_PARTICLES) {
+                this.exists = false; this.visible = false; this.on = false;
+                this.game.time.events.add(0, () => this.destroy());
+                return;
+            }
+            this.particleSpeed = BlockPuzzle.Settings.REDUCE_EFFECTS ? 1000 : 1200;
+            this.particlefrequency = BlockPuzzle.Settings.REDUCE_EFFECTS ? 22 : 17;
             this.level = level;
             this.points = points;
             this.distance = Phaser.Math.distance(targetPosition.x, targetPosition.y, startPosition.x, startPosition.y);
@@ -815,7 +837,7 @@ var BlockPuzzle;
             this.width = 25;
             this.height = 25;
             this.minParticleScale = 0.8;
-            this.maxParticleScale = 1.3;
+            this.maxParticleScale = BlockPuzzle.Settings.REDUCE_EFFECTS ? 1.1 : 1.3;
             this.gravity.setTo(0, 200);
             this.setYSpeed(-25, 25);
             this.setXSpeed(-25, 25);
@@ -906,8 +928,22 @@ var BlockPuzzle;
     class StarPickingUpEffect extends Phaser.Particles.Arcade.Emitter {
         constructor(block) {
             super(BlockPuzzle.App.instance, 0, 0, 250);
+            if (!BlockPuzzle.Settings.ENABLE_PARTICLES) {
+                // 仅保留星星精灵的飞行动画，不创建粒子
+                const parentGroup = BlockPuzzle.App.instance.state.getCurrentState().uiManager.starsCounter;
+                const startingPosition = parentGroup.toLocal(block.star.position, block);
+                const targetPosition = new PIXI.Point(0, 0);
+                parentGroup.addAt(block.star, 1);
+                block.star.position.set(startingPosition.x, startingPosition.y);
+                parentGroup.game.add.tween(block.star)
+                    .to({ x: targetPosition.x }, 420, Phaser.Easing.Sinusoidal.In, true);
+                parentGroup.game.add.tween(block.star)
+                    .to({ y: targetPosition.y }, 420, Phaser.Easing.Sinusoidal.In, true)
+                    .onComplete.add(() => { block.star.destroy(); BlockPuzzle.StarsManager.instance.pickupStars(1); this.destroy(); });
+                return;
+            }
             this.particleSpeed = 750;
-            this.particleFrequency = 8;
+            this.particleFrequency = BlockPuzzle.Settings.REDUCE_EFFECTS ? 12 : 8;
             const parentGroup = BlockPuzzle.App.instance.state.getCurrentState().uiManager.starsCounter;
             const startingPosition = parentGroup.toLocal(block.star.position, block);
             const targetPosition = new PIXI.Point(0, 0);
@@ -921,7 +957,7 @@ var BlockPuzzle;
             this.width = 30;
             this.height = 30;
             this.minParticleScale = 0.7;
-            this.maxParticleScale = 1.5;
+            this.maxParticleScale = BlockPuzzle.Settings.REDUCE_EFFECTS ? 1.2 : 1.5;
             this.gravity.setTo(0, -100);
             this.setYSpeed(-100, 100);
             this.setXSpeed(-100, 100);
@@ -3924,6 +3960,9 @@ var BlockPuzzle;
             this.game.scale.fullScreenScaleMode = BlockPuzzle.CustomScaleManager.getScaleMode();
             this.game.scale.pageAlignHorizontally = true;
             this.game.scale.pageAlignVertically = true;
+            // 关闭高开销的计时统计并固定目标 FPS
+            this.game.time.advancedTiming = false;
+            this.game.time.desiredFps = 60;
             if (this.game.device.android) {
                 this.game.input.mouse.enabled = !this.game.device.mspointer;
             }
@@ -3945,6 +3984,16 @@ var BlockPuzzle;
                     e.preventDefault();
                 };
             }
+            // 渲染细节优化：减少亚像素抖动与平滑成本
+            try {
+                this.game.stage.smoothed = false;
+                if (this.game.renderer && this.game.renderer.renderSession) {
+                    this.game.renderer.renderSession.roundPixels = true;
+                }
+                if (this.game.renderType === Phaser.CANVAS && Phaser.Canvas && Phaser.Canvas.setImageRenderingCrisp) {
+                    Phaser.Canvas.setImageRenderingCrisp(this.game.canvas);
+                }
+            } catch (_) {}
             BlockPuzzle.LocalizationManager.init(this.game.cache.getJSON('l10n'));
             this.game.state.start('Preloader', true, false);
         }

@@ -13,7 +13,11 @@ pack_sprites(
     sprites_dir="extracted_sprites/assets",
     output_atlas="vasugame/lib/Game/img/assets_new.png",
     output_json="vasugame/lib/Game/img/assets_new.json",
-    max_width=2048
+    max_width=2048,
+    scale=1.0,              # 可按需改为 0.9 或 0.85 进一步降分辨率
+    quantize_colors=192,    # 颜色量化以降体积（如有色带可升到 224/256）
+    png_optimize=True,
+    png_compress_level=9
 )
 
 print("\n✅ 打包完成！")

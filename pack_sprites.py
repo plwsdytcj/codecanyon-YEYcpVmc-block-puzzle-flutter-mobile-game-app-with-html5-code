@@ -9,7 +9,8 @@ import os
 from PIL import Image
 import math
 
-def pack_sprites(sprites_dir, output_atlas, output_json, max_width=2048):
+def pack_sprites(sprites_dir, output_atlas, output_json, max_width=2048,
+                 scale=1.0, quantize_colors=None, png_optimize=True, png_compress_level=9):
     """
     将目录中的精灵打包成精灵图集
 
@@ -25,6 +26,11 @@ def pack_sprites(sprites_dir, output_atlas, output_json, max_width=2048):
         if filename.lower().endswith('.png'):
             sprite_path = os.path.join(sprites_dir, filename)
             img = Image.open(sprite_path)
+            # 可选缩放以降低贴图分辨率
+            if scale and scale != 1.0:
+                w = max(1, int(img.width * scale))
+                h = max(1, int(img.height * scale))
+                img = img.resize((w, h), Image.LANCZOS)
             sprite_name = os.path.splitext(filename)[0]
             sprites.append({
                 'name': sprite_name,
@@ -100,7 +106,23 @@ def pack_sprites(sprites_dir, output_atlas, output_json, max_width=2048):
         }
 
     # 保存图集
-    atlas.save(output_atlas)
+    # 可选颜色量化以降低体积（谨慎：可能出现轻微色带）
+    if quantize_colors:
+        try:
+            # Pillow 的量化在 RGBA 上会生成带透明的调色板 PNG
+            atlas_to_save = atlas.quantize(colors=int(quantize_colors), method=Image.MEDIANCUT, dither=Image.FLOYDSTEINBERG)
+        except Exception:
+            atlas_to_save = atlas
+    else:
+        atlas_to_save = atlas
+
+    save_params = {}
+    if png_optimize:
+        save_params["optimize"] = True
+    if png_compress_level is not None:
+        save_params["compress_level"] = int(png_compress_level)
+
+    atlas_to_save.save(output_atlas, **save_params)
     print(f"✓ 图集已保存: {output_atlas}")
 
     # 保存 JSON
